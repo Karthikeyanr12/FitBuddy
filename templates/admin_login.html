@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitBuddy - Admin Authentication</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Background Ambient Lights -->
+    <div class="bg-ambient-lights">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div class="brand-text">FitBuddy<span class="brand-tag">SECURITY</span></div>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Generator
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="app-container" style="max-width: 520px; padding-top: 4rem;">
+        <main class="glass-card" style="text-align: center; padding: 3rem 2.25rem;">
+            <!-- Shield Icon -->
+            <div style="width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(16, 185, 129, 0.2)); border: 1px solid var(--border-highlight); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; font-size: 2rem; color: #818CF8; box-shadow: 0 0 25px rgba(99, 102, 241, 0.3);">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+
+            <h1 class="card-title" style="justify-content: center; font-size: 1.75rem; margin-bottom: 0.5rem;">
+                Admin Verification
+            </h1>
+            <p class="card-subtitle" style="margin-bottom: 2rem;">
+                Please enter the administrative password to access athlete profiles and plan history.
+            </p>
+
+            <!-- Error Banner -->
+            {% if error %}
+            <div class="alert-banner" style="background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.35); color: #FDA4AF; text-align: left; margin-bottom: 1.5rem;">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem; color: #F43F5E;"></i>
+                <div>{{ error }}</div>
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form action="/admin-login" method="POST">
+                <div class="form-group" style="text-align: left; margin-bottom: 1.75rem;">
+                    <label class="form-label" for="password">
+                        <span>Admin Password</span>
+                        <span class="form-hint">Default: 1234</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-key input-icon"></i>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            required 
+                            placeholder="Enter password..."
+                            autofocus>
+                        <button type="button" onclick="togglePasswordVisibility()" style="position: absolute; right: 1rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">
+                            <i class="fa-regular fa-eye" id="eye-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" style="padding: 1rem;">
+                    <i class="fa-solid fa-unlock-keyhole"></i>
+                    <span>Unlock Dashboard</span>
+                </button>
+            </form>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted);">
+                <span><i class="fa-solid fa-circle-info"></i> Initial Password: <code style="color: #6EE7B7; background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px;">1234</code></span>
+                <a href="/" style="color: var(--primary); text-decoration: none;">Return Home</a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eye-icon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

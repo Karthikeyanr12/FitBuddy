@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitBuddy - AI Workout Generator</title>
+    <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for modern icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Background Ambient Glows -->
+    <div class="bg-ambient-lights">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div class="brand-text">FitBuddy<span class="brand-tag">AI COACH</span></div>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link active">
+                    <i class="fa-solid fa-bolt"></i> Generator
+                </a>
+                <a href="/regenerate-plan" class="nav-link">
+                    <i class="fa-solid fa-arrows-rotate"></i> Regenerate Plan
+                </a>
+                <a href="/view-all-users" class="nav-link">
+                    <i class="fa-solid fa-users"></i> Admin Dashboard
+                </a>
+                <a href="/docs" target="_blank" class="nav-link">
+                    <i class="fa-solid fa-code"></i> API Docs
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Hero Header -->
+        <header class="hero-header">
+            <div class="hero-badge">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Powered by Google Gemini AI
+            </div>
+            <h1 class="hero-title">FitBuddy - <span>AI Workout</span> Generator</h1>
+            <p class="hero-subtitle">
+                Generate high-performance, personalized 7-day training routines and precision nutrition guidance tailored to your body and goals.
+            </p>
+        </header>
+
+        <!-- Main Form Card -->
+        <main class="glass-card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">
+                        <i class="fa-solid fa-sliders text-primary"></i> Tailor Your Fitness Profile
+                    </h2>
+                    <p class="card-subtitle">Fill in your physical attributes and goals for an AI-curated regimen.</p>
+                </div>
+            </div>
+
+            <!-- Quick Demo Profile Selector -->
+            <div class="demo-bar">
+                <span><i class="fa-solid fa-wand-sparkles"></i> <strong>Quick Test:</strong> Pre-fill sample profile:</span>
+                <div class="demo-chips">
+                    <button type="button" class="chip-btn" onclick="fillDemo('loss')">🔥 Weight Loss</button>
+                    <button type="button" class="chip-btn" onclick="fillDemo('muscle')">💪 Muscle Hypertrophy</button>
+                    <button type="button" class="chip-btn" onclick="fillDemo('marathon')">🏃 Endurance Run</button>
+                    <button type="button" class="chip-btn" onclick="fillDemo('wellness')">🧘 Flexibility & Wellness</button>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form id="plan-form" action="/generate-workout" method="POST">
+                <div class="form-grid">
+                    <!-- Name / Username -->
+                    <div class="form-group">
+                        <label class="form-label" for="name">
+                            <span>Full Name</span>
+                            <span class="form-hint">Required</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-user input-icon"></i>
+                            <input type="text" id="name" name="name" class="form-input" required placeholder="e.g. Alex Morgan" autocomplete="name">
+                        </div>
+                    </div>
+
+                    <!-- User ID -->
+                    <div class="form-group">
+                        <label class="form-label" for="user_id">
+                            <span>User ID</span>
+                            <span class="form-hint">Unique identifier</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-id-badge input-icon"></i>
+                            <input type="number" id="user_id" name="user_id" class="form-input" placeholder="e.g. 101" min="1">
+                        </div>
+                    </div>
+
+                    <!-- Age -->
+                    <div class="form-group">
+                        <label class="form-label" for="age">
+                            <span>Age</span>
+                            <span class="form-hint">Years</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-calendar input-icon"></i>
+                            <input type="number" id="age" name="age" class="form-input" required min="12" max="100" placeholder="25">
+                        </div>
+                    </div>
+
+                    <!-- Weight -->
+                    <div class="form-group">
+                        <label class="form-label" for="weight">
+                            <span>Body Weight</span>
+                            <span class="form-hint">in kg</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-weight-scale input-icon"></i>
+                            <input type="number" step="0.5" id="weight" name="weight" class="form-input" required min="30" max="250" placeholder="70">
+                        </div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group">
+                        <label class="form-label" for="gender">
+                            <span>Gender</span>
+                            <span class="form-hint">Optional</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-venus-mars input-icon"></i>
+                            <select id="gender" name="gender" class="form-select">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other / Non-binary</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fitness Goal -->
+                    <div class="form-group">
+                        <label class="form-label" for="goal">
+                            <span>Fitness Goal</span>
+                            <span class="form-hint">Target Objective</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-bullseye input-icon"></i>
+                            <select id="goal" name="goal" class="form-select" required>
+                                <option value="weight loss">Weight Loss & Lean Definition</option>
+                                <option value="muscle gain">Muscle Gain & Hypertrophy</option>
+                                <option value="general wellness">General Wellness & Mobility</option>
+                                <option value="marathon training">Endurance & Marathon Prep</option>
+                                <option value="strength & power">Athletic Strength & Power</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Intensity -->
+                    <div class="form-group form-full">
+                        <label class="form-label" for="intensity">
+                            <span>Workout Intensity Level</span>
+                            <span class="form-hint">Adjusts volume & rest</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-gauge-high input-icon"></i>
+                            <select id="intensity" name="intensity" class="form-select" required>
+                                <option value="low">Low (Beginner, gentle progression, 20-30 mins)</option>
+                                <option value="medium" selected>Medium (Intermediate, balanced volume, 40-50 mins)</option>
+                                <option value="high">High (Advanced, high volume/intensity, 60+ mins)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary btn-full" id="generate-btn">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Generate 7-Day Plan</span>
+                        <div class="spinner hidden" id="generate-spinner"></div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading Visual Indicator -->
+            <div id="loading-state" class="loading-overlay hidden">
+                <div class="loading-pulse">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                    <h3 style="color: var(--text-pure); margin-bottom: 0.5rem;">Synthesizing Your Custom Regimen...</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">Gemini AI is crafting periodized workouts, set/rep ranges, and nutrition advice.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #34D399;"></i>
+        <span id="toast-msg">Action completed!</span>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Preset profile fillers for instant testing
+        function fillDemo(type) {
+            const profiles = {
+                loss: { name: "Shreya Patel", user_id: 101, age: 24, weight: 65, gender: "Female", goal: "weight loss", intensity: "medium" },
+                muscle: { name: "Marcus Vance", user_id: 102, age: 28, weight: 82, gender: "Male", goal: "muscle gain", intensity: "high" },
+                marathon: { name: "Elena Rostova", user_id: 103, age: 31, weight: 58, gender: "Female", goal: "marathon training", intensity: "high" },
+                wellness: { name: "David Kim", user_id: 104, age: 45, weight: 75, gender: "Male", goal: "general wellness", intensity: "low" }
+            };
+            const p = profiles[type];
+            if (p) {
+                document.getElementById('name').value = p.name;
+                document.getElementById('user_id').value = p.user_id;
+                document.getElementById('age').value = p.age;
+                document.getElementById('weight').value = p.weight;
+                document.getElementById('gender').value = p.gender;
+                document.getElementById('goal').value = p.goal;
+                document.getElementById('intensity').value = p.intensity;
+                showToast(`Filled Demo: ${p.name} (${p.goal})`);
+            }
+        }
+    </script>
+</body>
+</html>

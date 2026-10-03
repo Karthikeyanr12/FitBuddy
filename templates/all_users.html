@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitBuddy - All Users & Workout Plans</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Background Ambient Glows -->
+    <div class="bg-ambient-lights">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div class="brand-text">FitBuddy<span class="brand-tag">ADMIN</span></div>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="fa-solid fa-plus"></i> New Plan
+                </a>
+                <a href="/regenerate-plan" class="nav-link">
+                    <i class="fa-solid fa-arrows-rotate"></i> Regenerate Plan
+                </a>
+                <a href="/view-all-users" class="nav-link active">
+                    <i class="fa-solid fa-users"></i> Admin Dashboard
+                </a>
+                <button type="button" class="nav-link" onclick="openPasswordModal()" style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: #A5B4FC; cursor: pointer;">
+                    <i class="fa-solid fa-key"></i> Change Password
+                </button>
+                <a href="/admin/logout" class="nav-link" style="color: #FDA4AF; border: 1px solid rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.08);">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="app-container" style="max-width: 1200px;">
+        <!-- Password Status Banners -->
+        {% if pwd_success %}
+        <div class="alert-banner alert-success fade-in">
+            <i class="fa-solid fa-circle-check alert-icon"></i>
+            <div><strong>Success!</strong> {{ pwd_success }}</div>
+        </div>
+        {% endif %}
+        {% if pwd_error %}
+        <div class="alert-banner" style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.35); color: #FDA4AF;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #F43F5E; font-size: 1.2rem;"></i>
+            <div><strong>Error:</strong> {{ pwd_error }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Header -->
+        <header class="hero-header">
+            <div class="hero-badge">
+                <i class="fa-solid fa-shield-halved"></i> Central Administrator View
+            </div>
+            <h1 class="hero-title">📋 FitBuddy - All Users & <span>Workout Plans</span></h1>
+            <p class="hero-subtitle">
+                Inspect registered athlete profiles, trace AI-generated workout iterations, and review original vs revised routines.
+            </p>
+        </header>
+
+        <!-- Metrics Overview -->
+        <div class="admin-metrics">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <div class="metric-number">{{ total_users or users|length }}</div>
+                    <div class="metric-label">Registered Athletes</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: #34D399;">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div>
+                    <div class="metric-number">{{ users|length }}</div>
+                    <div class="metric-label">Active Workout Plans</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: #FCD34D;">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <div>
+                    {% set updated_count = users | selectattr('updated_plan', 'ne', 'Not updated') | list | length %}
+                    <div class="metric-number">{{ updated_count }}</div>
+                    <div class="metric-label">Feedback Revisions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <main class="glass-card" style="padding: 1.75rem;">
+            <!-- Controls bar: Search & Actions -->
+            <div class="table-controls">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass input-icon" style="left: 0.85rem;"></i>
+                    <input 
+                        type="text" 
+                        id="user-search" 
+                        class="form-input" 
+                        style="padding-left: 2.5rem; font-size: 0.9rem;" 
+                        placeholder="Search athlete by name or goal..."
+                        onkeyup="filterUsersTable()">
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <a href="/" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.9rem;">
+                        <i class="fa-solid fa-plus"></i> Generate New Plan
+                    </a>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="custom-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">User ID</th>
+                            <th>Name</th>
+                            <th style="width: 70px;">Age</th>
+                            <th style="width: 100px;">Weight</th>
+                            <th>Goal</th>
+                            <th>Intensity</th>
+                            <th style="min-width: 280px;">Original Plan</th>
+                            <th style="min-width: 280px;">Updated Plan</th>
+                            <th style="width: 80px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if users %}
+                            {% for user in users %}
+                            <tr class="user-row">
+                                <td>
+                                    <span class="badge badge-indigo">#{{ user.id }}</span>
+                                </td>
+                                <td>
+                                    <strong>{{ user.name }}</strong>
+                                    {% if user.gender and user.gender != 'Not Specified' %}
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ user.gender }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.age }}</td>
+                                <td>{{ user.weight }} kg</td>
+                                <td>
+                                    <span class="badge badge-emerald" style="text-transform: capitalize;">{{ user.goal }}</span>
+                                </td>
+                                <td>
+                                    {% if user.intensity|lower == 'high' %}
+                                        <span class="badge badge-rose">High</span>
+                                    {% elif user.intensity|lower == 'low' %}
+                                        <span class="badge badge-emerald">Low</span>
+                                    {% else %}
+                                        <span class="badge badge-amber">Medium</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.original_plan and user.original_plan != 'N/A' %}
+                                        <pre>{{ user.original_plan }}</pre>
+                                    {% else %}
+                                        <span style="color: var(--text-muted); font-size: 0.85rem;">No Plan Stored</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.updated_plan and user.updated_plan != 'Not updated' %}
+                                        <pre style="border-left: 3px solid #10B981;">{{ user.updated_plan }}</pre>
+                                    {% else %}
+                                        <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Not updated</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    <form action="/delete-user/{{ user.id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete athlete #{{ user.id }} ({{ user.name }})?');">
+                                        <button type="submit" class="btn btn-danger" title="Delete User">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                    <i class="fa-regular fa-folder-open" style="font-size: 2rem; margin-bottom: 0.75rem; display: block;"></i>
+                                    No athletes registered yet. <a href="/" style="color: var(--primary);">Generate the first workout plan!</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="password-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #FFF; display: flex; align-items: center; gap: 0.6rem;">
+                    <i class="fa-solid fa-shield-halved" style="color: #818CF8;"></i> Change Admin Password
+                </h3>
+                <button type="button" onclick="closePasswordModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form action="/admin/change-password" method="POST">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label" for="current_password">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" class="form-input no-icon" required placeholder="Enter current password">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label" for="new_password">New Password</label>
+                    <input type="password" id="new_password" name="new_password" class="form-input no-icon" required minlength="4" placeholder="Enter new password (min 4 characters)">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.75rem;">
+                    <label class="form-label" for="confirm_password">Confirm New Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-input no-icon" required minlength="4" placeholder="Re-enter new password">
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Save New Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #34D399;"></i>
+        <span id="toast-msg">Updated</span>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Modal controls
+        function openPasswordModal() {
+            document.getElementById('password-modal').classList.remove('hidden');
+        }
+        function closePasswordModal() {
+            document.getElementById('password-modal').classList.add('hidden');
+        }
+
+        // Close on Escape or click outside
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closePasswordModal();
+        });
+        document.getElementById('password-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'password-modal') closePasswordModal();
+        });
+
+        // Client-side search / filter for admin table
+        function filterUsersTable() {
+            const query = document.getElementById('user-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#users-table tbody .user-row');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

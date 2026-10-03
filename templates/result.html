@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitBuddy - Your Personalized Workout Plan</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Background Ambient Lights -->
+    <div class="bg-ambient-lights">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-dumbbell"></i>
+                </div>
+                <div class="brand-text">FitBuddy<span class="brand-tag">AI COACH</span></div>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="fa-solid fa-plus"></i> New Plan
+                </a>
+                <a href="/regenerate-plan?username={{ username or name }}" class="nav-link">
+                    <i class="fa-solid fa-arrows-rotate"></i> Regenerate Plan
+                </a>
+                <a href="/view-all-users" class="nav-link">
+                    <i class="fa-solid fa-users"></i> Admin Dashboard
+                </a>
+                <a href="/docs" target="_blank" class="nav-link">
+                    <i class="fa-solid fa-code"></i> API Docs
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        
+        <!-- Confirmation Banner (Shown when updated based on feedback) -->
+        {% if updated_message %}
+        <div class="alert-banner alert-success fade-in">
+            <i class="fa-solid fa-circle-check alert-icon"></i>
+            <div>
+                <strong>Success!</strong> {{ updated_message }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Hero Title -->
+        <header class="hero-header">
+            <div class="hero-badge">
+                <i class="fa-solid fa-sparkles"></i> 7-Day Custom Fitness Blueprint
+            </div>
+            <h1 class="hero-title">🏋️ Your Personalized <span>Workout Plan</span></h1>
+            <p class="hero-subtitle">
+                Engineered for {{ name or username }}, balancing progressive overload, conditioning, and recovery.
+            </p>
+        </header>
+
+        <!-- User Information Summary Card -->
+        <section class="glass-card" style="margin-bottom: 2rem;">
+            <div class="card-header" style="margin-bottom: 1rem; padding-bottom: 0.75rem;">
+                <h2 class="card-title" style="font-size: 1.25rem;">
+                    <i class="fa-solid fa-id-card text-primary"></i> User Information
+                </h2>
+                <span class="badge badge-emerald">Active Profile</span>
+            </div>
+
+            <div class="user-profile-summary">
+                <div class="profile-stat">
+                    <span class="stat-label">Name</span>
+                    <span class="stat-value" id="profile-name">{{ name or username }}</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-label">User ID</span>
+                    <span class="stat-value" id="profile-id">#{{ user_id }}</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-label">Age</span>
+                    <span class="stat-value">{{ age }} yrs</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-label">Weight</span>
+                    <span class="stat-value">{{ weight }} kg</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-label">Gender</span>
+                    <span class="stat-value">{{ gender or "Not Specified" }}</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-label">Primary Goal</span>
+                    <span class="stat-value" style="color: #6EE7B7; text-transform: capitalize;">{{ goal }}</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-label">Intensity</span>
+                    <span class="stat-value">
+                        {% if intensity|lower == 'high' %}
+                            <span class="badge badge-rose">High (Advanced)</span>
+                        {% elif intensity|lower == 'low' %}
+                            <span class="badge badge-emerald">Low (Beginner)</span>
+                        {% else %}
+                            <span class="badge badge-amber">Medium (Intermediate)</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Nutrition Tip Section -->
+            <div class="tip-callout">
+                <div class="tip-header">
+                    <div class="tip-title">
+                        <i class="fa-solid fa-lightbulb"></i> Nutrition & Recovery Tip
+                    </div>
+                    <button type="button" class="tip-refresh-btn" id="refresh-tip-btn" onclick="fetchNewNutritionTip('{{ goal }}')">
+                        <i class="fa-solid fa-arrows-rotate"></i> Refresh Tip
+                    </button>
+                </div>
+                <p class="tip-text" id="nutrition-tip-content">
+                    {{ nutrition_tip or "Prioritize quality sleep and lean protein with each meal to accelerate recovery and support training adaptations." }}
+                </p>
+            </div>
+        </section>
+
+        <!-- Workout Plan Content Card -->
+        <section class="glass-card">
+            <div class="plan-actions-bar">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-calendar-week text-primary"></i> 7-Day Training Regimen
+                </h2>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="copyWorkoutPlan()">
+                        <i class="fa-regular fa-copy"></i> Copy Plan
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="window.print()">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" id="toggle-view-btn" onclick="toggleFormatView()">
+                        <i class="fa-solid fa-code"></i> View Raw &lt;pre&gt;
+                    </button>
+                </div>
+            </div>
+
+            <!-- Markdown Rendered Plan Container -->
+            <div id="rendered-plan" class="markdown-container">
+                <!-- Injected via JavaScript Marked.js -->
+            </div>
+
+            <!-- Raw Pre Block Format (as explicitly specified in PDF) -->
+            <div id="raw-plan-wrapper" class="hidden">
+                <pre class="workout-pre" id="raw-workout-pre">{{ workout_plan }}</pre>
+            </div>
+
+            <!-- Regenerate Plan Callout (Replaces immediate feedback form) -->
+            <div style="margin-top: 2.25rem; padding: 2rem; background: rgba(13, 18, 30, 0.5); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); text-align: center;">
+                <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-size: 1.4rem; color: #818CF8;">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #FFF; margin-bottom: 0.5rem;">
+                    Want to customize or tweak this workout plan?
+                </h3>
+                <p style="color: var(--text-secondary); max-width: 580px; margin: 0 auto 1.5rem auto; font-size: 0.95rem;">
+                    You can modify your regimen anytime. Go to the Regenerate Plan page to review your current plan and submit custom feedback.
+                </p>
+                <a href="/regenerate-plan?username={{ username or name }}" class="btn btn-primary" style="padding: 0.85rem 2rem;">
+                    <i class="fa-solid fa-arrows-rotate"></i> Go to Regenerate Plan Page
+                </a>
+            </div>
+        </section>
+
+        <!-- Bottom Actions -->
+        <div style="display: flex; justify-content: space-between; margin-top: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <a href="/" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Create Another Routine
+            </a>
+            <a href="/view-all-users" class="btn btn-secondary">
+                <i class="fa-solid fa-table-list"></i> View All Users & Plans
+            </a>
+        </div>
+    </div>
+
+    <!-- Hidden Raw Markdown Plan Source for JS Rendering -->
+    <div id="raw-markdown-data" style="display: none;">{{ workout_plan }}</div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #34D399;"></i>
+        <span id="toast-msg">Copied to clipboard!</span>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Render Markdown immediately on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const rawContent = document.getElementById('raw-markdown-data').textContent;
+            const renderedContainer = document.getElementById('rendered-plan');
+            if (rawContent && renderedContainer && window.marked) {
+                renderedContainer.innerHTML = marked.parse(rawContent);
+            }
+        });
+
+        // Toggle between formatted markdown and PDF <pre> block
+        function toggleFormatView() {
+            const markdownEl = document.getElementById('rendered-plan');
+            const rawEl = document.getElementById('raw-plan-wrapper');
+            const toggleBtn = document.getElementById('toggle-view-btn');
+
+            if (rawEl.classList.contains('hidden')) {
+                rawEl.classList.remove('hidden');
+                markdownEl.classList.add('hidden');
+                toggleBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> View Formatted Cards';
+            } else {
+                rawEl.classList.add('hidden');
+                markdownEl.classList.remove('hidden');
+                toggleBtn.innerHTML = '<i class="fa-solid fa-code"></i> View Raw &lt;pre&gt;';
+            }
+        }
+
+
+        // Copy workout plan to clipboard
+        function copyWorkoutPlan() {
+            const rawContent = document.getElementById('raw-markdown-data').textContent;
+            navigator.clipboard.writeText(rawContent).then(() => {
+                showToast("Workout plan copied to clipboard!");
+            }).catch(() => {
+                showToast("Failed to copy plan.");
+            });
+        }
+
+        // Fetch dynamic nutrition tip
+        async function fetchNewNutritionTip(goal) {
+            const tipEl = document.getElementById('nutrition-tip-content');
+            const btn = document.getElementById('refresh-tip-btn');
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/nutrition-tip?goal=${encodeURIComponent(goal || 'general wellness')}`);
+                const data = await res.json();
+                if (data.tip || data.nutrition_tip) {
+                    tipEl.style.opacity = 0;
+                    setTimeout(() => {
+                        tipEl.textContent = data.tip || data.nutrition_tip;
+                        tipEl.style.opacity = 1;
+                        showToast("New nutrition tip generated!");
+                    }, 200);
+                }
+            } catch (e) {
+                showToast("Could not fetch new tip.");
+            } finally {
+                btn.innerHTML = originalBtnHtml;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

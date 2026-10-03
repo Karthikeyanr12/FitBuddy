@@ -1,0 +1,41 @@
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Local SQLite Database
+*.db
+fitbuddy.db
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+fitbuddy-env/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs & temp files
+*.log
+scratch/
+.tmp/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
