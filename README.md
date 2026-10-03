@@ -1,127 +1,210 @@
-# FitBuddy - AI Fitness Plan Generator using Gemini Models
+# FitBuddy - AI Fitness Plan Generator
 
-FitBuddy is an intelligent, full-stack fitness web application that generates personalized 7-day workout plans and nutrition tips using Google Gemini AI models (**Gemini 1.5 Pro** and **Gemini Flash**). Built with FastAPI, SQLAlchemy, SQLite, and modern Jinja2 templates, FitBuddy features dynamic plan generation, iterative feedback revision, and a centralized admin dashboard.
+<div align="center">
 
----
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-005571?style=for-the-badge&logo=fastapi)
+![Google Gemini](https://img.shields.io/badge/Google%20Gemini-Pro%20%26%20Flash-8E75B2?style=for-the-badge&logo=google)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-D71F00?style=for-the-badge&logo=sqlalchemy)
+![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?style=for-the-badge&logo=sqlite)
 
-## 🚀 Key Features (Aligned with Project Milestones)
+<p align="center">
+  <strong>An enterprise-grade, AI-driven wellness platform delivering personalized 7-day training periodization, goal-aligned nutrition intelligence, and iterative plan refinement.</strong>
+</p>
 
-- **Scenario 1: Personalized 7-Day Workout Routine Generation**
-  - Tailors exercise selection, sets, reps, warm-ups, and cooldowns based on Name, User ID, Age, Weight, Fitness Goal, and Intensity.
-  - Powered by **Google Gemini Pro** (with automated fallback).
-- **Scenario 2: Dedicated Regenerate Plan Page (`/regenerate-plan`)**
-  - Instead of cluttering the initial generation page with immediate feedback forms, users visit the dedicated **Regenerate Plan** page.
-  - Step 1: Athlete enters their registered **Username** or **User ID** to look up and inspect their **current/old workout plan**.
-  - Step 2: Athlete enters specific feedback (with 1-click suggested chips like *"+ 15m Cardio"*, *"+ Restorative Yoga"*).
-  - Step 3: Google Gemini AI revises the routine accordingly, updates the database, and displays the **newly modified plan** alongside the confirmation banner: `✅ Your plan has been updated based on your feedback!`.
-- **Scenario 3: AI Nutrition & Recovery Tips**
-  - Delivers targeted, actionable dietary guidance aligned with the athlete's primary goal using **Gemini Flash**.
-  - Dynamic on-page refresh button to generate alternative nutrition advice.
-- **Scenario 4: Centralized Admin Dashboard (`/view-all-users`)**
-  - **Password Protection:** Visiting `/view-all-users` prompts for the admin password (default: `1234`).
-  - **Change Password:** Once authenticated, the admin can change their password anytime via the modal dialog, which persists in SQLite.
-  - Real-time athlete overview displaying User ID, Name, Age, Weight, Goal, Intensity, Original Plan, and Updated Plan side-by-side.
-  - Includes real-time athlete search filter and delete management.
-  - Dedicated **Logout** button to clear the admin session.
+</div>
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## 📌 Executive Summary
 
-- **Backend:** FastAPI, Uvicorn, Python 3.10+
-- **Database:** SQLite with SQLAlchemy ORM (`fitbuddy.db`)
-- **AI Engine:** Google Gemini Generative AI SDK (`google-generativeai`)
-- **Frontend:** HTML5, Modern CSS (Glassmorphism, Dark Mode, Responsive Design), Jinja2 Templating, FontAwesome, Marked.js
+**FitBuddy** is a full-stack health-tech web application engineered to bridge conversational generative artificial intelligence with practical exercise science. By evaluating individual biometric profiles, fitness goals, and training experience levels, FitBuddy generates structured, day-by-day regimens accompanied by tailored nutritional guidance.
+
+The platform implements an asynchronous feedback loop allowing athletes to submit continuous adjustments to their active plan, alongside a protected administrative management console for trainer oversight and progress comparison.
 
 ---
 
-## 📋 Required Environment Variables (`.env`)
+## 🏛️ System Architecture
 
-To enable live AI generation with Google Gemini, create or edit the `.env` file in the root directory:
+```text
+┌────────────────┐          HTTP Requests         ┌────────────────────────┐
+│  User Browser  │ ◄────────────────────────────► │     FastAPI Engine     │
+└────────────────┘                                └───────────┬────────────┘
+        │                                                     │
+   Jinja2 + CSS                                       SQLAlchemy ORM
+        ▼                                                     ▼
+┌────────────────────────┐                        ┌────────────────────────┐
+│  Modern Frontend UI    │                        │  SQLite Persistence    │
+│  - index.html          │                        │  (fitbuddy.db)         │
+│  - result.html         │                        │  - Users Table         │
+│  - regenerate_plan.html│                        │  - WorkoutPlan Table   │
+│  - all_users.html      │                        │  - Feedback Table      │
+│  - admin_login.html    │                        │  - AdminSetting Table  │
+└────────────────────────┘                        └────────────────────────┘
+                                                              │
+                                                      Google Generative AI
+                                                              ▼
+                                                  ┌────────────────────────┐
+                                                  │ Gemini 1.5 Pro / Flash │
+                                                  │ - Workout Generation   │
+                                                  │ - Plan Refinement      │
+                                                  │ - Nutrition Advisory   │
+                                                  └────────────────────────┘
+```
+
+---
+
+## ✨ Core Capabilities
+
+### 1. Personalized 7-Day Workout Periodization
+- Synthesizes user biometrics (**Name**, **User ID**, **Age**, **Weight**, **Gender**, **Fitness Goal**, and **Intensity Level**).
+- Builds day-by-day training routines featuring structured **Warm-ups (5–10 mins)**, **Main Workouts** (with targeted sets, reps, and recommended rest intervals), and **Cooldown Protocols**.
+
+### 2. Dedicated Plan Regeneration Workflow (`/regenerate-plan`)
+- Separates the workout consultation from initial generation for improved usability.
+- **Lookup & Inspection:** Athletes query by registered Username or User ID to review their active baseline routine.
+- **AI Modification:** Accepts custom athlete feedback (*e.g., "Add 15 minutes of cardio", "Adjust for limited home equipment"*) and dynamically rewrites the schedule while preserving unchanged days.
+- Displays the updated routine with an instant confirmation indicator.
+
+### 3. Precision Nutrition & Recovery Intelligence
+- Generates concise, actionable dietary guidance aligned with the user's specific fitness goal via **Gemini Flash**.
+- Features client-side asynchronous tip refresh without requiring a full page reload.
+
+### 4. Protected Central Administrator Console (`/view-all-users`)
+- **Credential Protection:** Requires administrative verification prior to accessing platform metrics and athlete records.
+- **In-Session Password Management:** Allows administrators to modify access credentials dynamically from within the dashboard, persisting changes directly in SQLite.
+- **Comparative Audit:** Displays user profiles with original plans and updated feedback plans side-by-side.
+- **Data Management:** Includes real-time athlete search filtering and profile deletion controls.
+
+---
+
+## ⚙️ Configuration & Environment Setup
+
+FitBuddy requires a Google Gemini API key to interact with live generative models.
+
+1. Create a `.env` file in the project root (a template is available at [`.env.example`](.env.example)):
 
 ```env
 GOOGLE_API_KEY=your_gemini_api_key_here
 ```
 
-### How to get your API Key:
-1. Visit [Google AI Studio](https://aistudio.google.com/).
-2. Sign in with your Google account.
-3. Click **"Get API key"** and create a new key.
-4. Paste the key into `.env` as shown above.
+2. Acquire your API key and populate the `GOOGLE_API_KEY` variable above.
 
-> **Note:** If `GOOGLE_API_KEY` is not provided or quota is exceeded, FitBuddy automatically uses an intelligent built-in generator template so that all UI workflows, database persistence, and feedback loops remain 100% testable and operable without server crashes.
+> **Resilience Architecture:** If `GOOGLE_API_KEY` is omitted or quota is exceeded, FitBuddy automatically invokes an intelligent internal fallback template. All user interfaces, database persistence operations, and revision endpoints remain 100% functional and testable without runtime exceptions.
 
 ---
 
-## 💻 Installation & Local Setup
+## 🚀 Installation & Local Deployment
 
-### 1. Clone or Open Project
-```powershell
-cd K:\FitBuddy
+### Prerequisites
+- Python 3.10 or higher
+- Git
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/fitbuddy.git
+cd fitbuddy
 ```
 
-### 2. Set Up Virtual Environment (Optional but Recommended)
-```powershell
+### 2. Initialize Virtual Environment
+```bash
+# Windows
 python -m venv fitbuddy-env
 fitbuddy-env\Scripts\activate
+
+# Linux / macOS
+python3 -m venv fitbuddy-env
+source fitbuddy-env/bin/activate
 ```
 
-### 3. Install Required Dependencies
-```powershell
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-### 4. Start the Application Server
-Run either:
-```powershell
-uvicorn main:app --reload
+### 4. Launch Application Server
+Execute using Uvicorn:
+```bash
+python -m uvicorn main:app --reload --port 8000
 ```
-or (as per the PDF specification):
+*Or on Windows using the included launcher:*
 ```powershell
-uvicorn app.main:app --reload
+.\run.bat
 ```
 
-### 5. Access the Web Pages
+### 5. Access Endpoints
 - **Workout Generator Form:** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-- **Admin Dashboard (All Users):** [http://127.0.0.1:8000/view-all-users](http://127.0.0.1:8000/view-all-users)
-- **FastAPI Interactive API Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **Plan Regeneration Portal:** [http://127.0.0.1:8000/regenerate-plan](http://127.0.0.1:8000/regenerate-plan)
+- **Admin Dashboard:** [http://127.0.0.1:8000/view-all-users](http://127.0.0.1:8000/view-all-users) *(Default password: `1234`)*
+- **Interactive Swagger Documentation:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
-## 📁 Project Structure
+## 🔌 API Specification
+
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | Renders user registration & workout generator form | Public |
+| `POST` | `/generate-workout` | Processes profile inputs, invokes Gemini AI, returns workout regimen | Public |
+| `GET` | `/regenerate-plan` | Renders username lookup and active workout review portal | Public |
+| `POST` | `/regenerate-plan` | Revises active plan according to submitted athlete feedback | Public |
+| `GET` | `/nutrition-tip` | Returns targeted nutritional advice based on fitness goal | Public |
+| `GET` | `/admin-login` | Renders administrative verification screen | Public |
+| `POST` | `/admin-login` | Authenticates administrator credentials and issues session cookie | Public |
+| `GET` | `/admin/logout` | Clears administrative session cookie and redirects home | Protected |
+| `POST` | `/admin/change-password` | Updates administrative password in SQLite configuration table | Protected |
+| `GET` | `/view-all-users` | Displays centralized athlete records, plans, and revision history | Protected |
+| `POST` | `/delete-user/{id}` | Removes athlete record and associated workout history | Protected |
+| `GET` | `/users/{id}/latest_plan` | REST endpoint returning latest plan content for user | Public |
+
+---
+
+## 📂 Repository Structure
 
 ```text
 FitBuddy/
-├── .env                       # Environment variables (Gemini API Key)
-├── .env.example               # Template for environment configuration
-├── requirements.txt           # Project dependencies
-├── database.py                # SQLite database configuration & ORM operations
-├── models.py                  # SQLAlchemy models (User, WorkoutPlan, Feedback)
-├── schemas.py                 # Pydantic validation schemas
+├── .env                       # Environment configuration (Gemini API Key)
+├── .env.example               # Template environment variables
+├── .gitignore                 # Version control exclusions
+├── requirements.txt           # Project package dependencies
+├── run.bat                    # One-click startup script for Windows
+├── database.py                # Database connection engine & helper operations
+├── models.py                  # SQLAlchemy ORM declarations (User, Plan, Feedback, Admin)
+├── schemas.py                 # Pydantic data validation schemas
 ├── crud.py                    # Database CRUD operations
-├── ai_service.py              # Gemini AI integration (Pro & Flash) with fallback
-├── main.py                    # Main FastAPI server & route handlers
-├── test_models.py             # Script to verify available Gemini models
-├── app/                       # Modular package aligned with PDF Milestone 2/3
+├── ai_service.py              # Gemini generative engine & graceful fallback logic
+├── main.py                    # FastAPI application, route handlers, and middleware
+├── test_models.py             # Diagnostic script for checking Gemini model availability
+├── app/                       # Package structure aligned with project specifications
 │   ├── __init__.py
 │   ├── main.py
 │   ├── routes.py
 │   ├── gemini_generator.py
 │   ├── gemini_flash_generator.py
 │   └── updated_plan.py
-├── services/                  # Services package alias
+├── services/                  # Service layer package alias
 │   ├── __init__.py
 │   └── ai_service.py
 ├── static/
 │   ├── css/
 │   │   └── styles.css         # Modern fitness UI styling & animations
 │   ├── js/
-│   │   └── main.js            # Frontend interactivity & loading indicators
+│   │   └── main.js            # Frontend interactivity & state management
 │   └── images/
-│       ├── gym-bg.svg         # Athletic gym background pattern
-│       └── gym-bg.jpg         # Gym-themed visual asset
+│       ├── gym-bg.svg         # Geometric gym background graphic
+│       └── gym-bg.jpg         # Background fallback image
 └── templates/
-    ├── index.html             # Homepage & user details input form
-    ├── result.html            # 7-day workout plan, nutrition tip, feedback form
-    └── all_users.html         # Admin dashboard table for all users & plans
+    ├── index.html             # Homepage: biometric input & demo profiles
+    ├── result.html            # Results: generated plan & nutrition advisory
+    ├── regenerate_plan.html   # Dedicated portal: plan lookup & AI revision
+    ├── all_users.html         # Admin dashboard: athlete table & management
+    └── admin_login.html       # Protected administrative verification page
 ```
+
+---
+
+## 🛡️ Security & Authentication
+
+- Administrative endpoints are shielded with HTTP-only, SameSite session cookies (`admin_session`).
+- The default administrative password is set to `1234` upon initial database bootstrap and can be updated securely at any time from within the dashboard.
+- Sensitive environment files (`.env`) and local database binaries (`*.db`) are excluded from source control via `.gitignore`.
